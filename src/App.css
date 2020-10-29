@@ -1,38 +1,43 @@
-.App {
-  text-align: center;
+:root{
+  --main-global-primary-color: white;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.container {
+  margin-top: 45px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+#order-logo{
+  width: 300px;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin: 0 auto;
 }
 
-.App-link {
-  color: #61dafb;
+#aboutHero{
+  padding: 35px;
+  border-radius: 5px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+#initialDataHero{
+  border-radius: 5px;
+}
+
+.endpointSectionBody{
+  display: flex;
+}
+
+.endpointSectionBody-inputSide{
+  flex: 1.75;
+}
+
+.endpointSectionBody-descriptionSide{
+  flex: 1.25;
+}
+
+ul{
+  list-style: disc;
+  padding-left: 50px;
+}
+
+.field{
+  width: 85%;
 }
