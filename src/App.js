@@ -5,7 +5,8 @@ import './App.css';
 
 class App extends React.Component{
   EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-
+  BASE_URL = "http://localhost:8080";
+  
   state = {
     section1: {
         inputs: {
@@ -15,12 +16,57 @@ class App extends React.Component{
           address: "Tom doe street 22",
           phoneNumber: "012345678"
         },
-        isEmailValid: true
+        isEmailValid: true,
+        returnedResult: "",
+        requestWasSuccessful: true
     }
   }
 
+  highlightInputIfEmpty = (section, inputName) => {
+    return this.state[section].inputs[inputName].length !== 0 ? " is-success" : " is-danger";
+  }
+
+  displayHelperMessageIfInputEmpty = (section, inputName) => {
+    return this.state[section].inputs[inputName].length !== 0 ? " is-hidden" : " is-danger";
+  }
+
+  areAllInputsInSectionNotEmpty(section){
+
+    for(let input of Object.values(this.state[section].inputs)){
+        if(input.length === 0) return false;
+    }
+
+    return true;
+  }
+
   createCustomer = () => {
-    console.log("I got clicked!");
+    if(this.areAllInputsInSectionNotEmpty("section1")){
+
+      fetch( this.BASE_URL + "/customers", {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          firstName: this.state.section1.inputs.firstName,
+          lastName: this.state.section1.inputs.lastName,
+          emailAddress: this.state.section1.inputs.emailAddress,
+          address: this.state.section1.inputs.address,
+          phoneNumber: this.state.section1.inputs.phoneNumber
+        })
+      }).then(res => res.json())
+        .then(result => {
+          let stringResult = JSON.stringify(result);
+          stringResult = stringResult.replaceAll(",\"", ",\n\"");
+          let oldState = this.state;
+          oldState.section1.returnedResult = stringResult;
+          oldState.section1.requestWasSuccessful = result.status && result.status === 400 ? false : true;
+          this.setState(oldState)
+        })
+        .catch(err => console.log(err));
+
+    };
   }
 
   handleInputChange = (event) => {
@@ -70,14 +116,16 @@ class App extends React.Component{
             <div className="field">
               <label className="label">Customer's first name</label>
               <div className="control">
-                <input type="text" className="input" value={this.state.section1.inputs.firstName} onChange={this.handleInputChange} name="firstName" placeholder="John"/>
+                <input type="text" className={ "input" + this.highlightInputIfEmpty("section1", "firstName") } value={this.state.section1.inputs.firstName} onChange={this.handleInputChange} name="firstName" placeholder="John"/>
+                <p className={"help "  + this.displayHelperMessageIfInputEmpty("section1", "firstName")}>First name can't be empty</p>
               </div>
             </div>
 
             <div className="field">
               <label className="label">Customer's last name</label>
               <div className="control">
-                <input type="text" className="input" value={this.state.section1.inputs.lastName} onChange={this.handleInputChange} name="lastName" placeholder="Doe"/>
+                <input type="text" className={ "input" + this.highlightInputIfEmpty("section1", "lastName") } value={this.state.section1.inputs.lastName} onChange={this.handleInputChange} name="lastName" placeholder="Doe"/>
+                <p className={"help "  + this.displayHelperMessageIfInputEmpty("section1", "lastName")}>Last name can't be empty</p>
               </div>
             </div>
 
@@ -92,14 +140,16 @@ class App extends React.Component{
             <div className="field">
               <label className="label">Customer's address</label>
               <div className="control">
-                <input type="text" className="input" value={this.state.section1.inputs.address} onChange={this.handleInputChange} name="address" placeholder="John doe street 23"/>
+                <input type="text" className={ "input" + this.highlightInputIfEmpty("section1", "address") } value={this.state.section1.inputs.address} onChange={this.handleInputChange} name="address" placeholder="John doe street 23"/>
+                <p className={"help "  + this.displayHelperMessageIfInputEmpty("section1", "address")}>Address can't be empty</p>
               </div>
             </div>
 
             <div className="field">
               <label className="label">Customer's phone number</label>
               <div className="control">
-                <input type="text" className="input" value={this.state.section1.inputs.phoneNumber} onChange={this.handleInputChange} name="phoneNumber" placeholder="012345678"/>
+                <input type="text" className={ "input" + this.highlightInputIfEmpty("section1", "phoneNumber") } value={this.state.section1.inputs.phoneNumber} onChange={this.handleInputChange} name="phoneNumber" placeholder="012345678"/>
+                <p className={"help "  + this.displayHelperMessageIfInputEmpty("section1", "phoneNumber")}>Phone number can't be empty</p>
               </div>
             </div>
 
@@ -126,6 +176,10 @@ class App extends React.Component{
             </Hero.Body>
           </Hero>
           
+        </div>
+        <div className={"endpointSectionResult" + (this.state.section1.returnedResult.length === 0 ? " is-hidden" : "")}>
+          <Heading size={4} >Results:</Heading>
+          <textarea className={"textarea " + (this.state.section1.requestWasSuccessful ? " is-success" : " is-danger")} rows={7} value={this.state.section1.returnedResult} readOnly></textarea>
         </div>
         </Section>
       </div>
