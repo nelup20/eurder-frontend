@@ -3,8 +3,8 @@ import WebAppInformationSection from "./WebAppInformationSection";
 import InitialDataSection from "./InitialDataSection";
 import Story1 from "./stories/Story1";
 import Story2 from "./stories/Story2";
+import Story3 from "./stories/Story3";
 import "react-bulma-components/dist/react-bulma-components.min.css";
-import {Hero, Section, Heading} from "react-bulma-components";
 import './App.css';
 
 
@@ -58,19 +58,36 @@ class App extends React.Component{
     },
   }
 
-  highlightInputIfEmpty = (story, inputName) => {
+  highlightInputIfEmpty = (story, inputName, itemIndex = 0) => {
+    if(story === "story3" && inputName === "itemId" && itemIndex){
+      return this.state[story].inputs.items[itemIndex.index][inputName].length !== 0 ? " is-success" : " is-danger";
+    }
+
     return this.state[story].inputs[inputName].length !== 0 ? " is-success" : " is-danger";
   }
 
-  displayHelperMessageIfInputEmpty = (story, inputName) => {
+  displayHelperMessageIfInputEmpty = (story, inputName, itemIndex = 0) => {
+    if(story === "story3" && inputName === "itemId"){
+      return this.state[story].inputs.items[itemIndex.index][inputName].length !== 0 ? " is-hidden" : " is-danger";
+    }
+
     return this.state[story].inputs[inputName].length !== 0 ? " is-hidden" : " is-danger";
   }
 
-  highlightNumericInputIfNegative = (story, inputName) => {
+  highlightNumericInputIfNegative = (story, inputName, itemIndex = 0) => {
+    if(story === "story3" && inputName === "itemQuantityToOrder"){
+      // WHY WHY WHY. Why was itemIndex an object in the regular highlightInputIfEmpty but here it's just the int directly? Spent ~15 mins figuring out why the above didn't work & just had to console.log to see itemIndex in the above function was an object.
+      return this.state[story].inputs.items[itemIndex][inputName] >= 0 ? " is-success" : " is-danger";
+    }
+
     return this.state[story].inputs[inputName] >= 0 ? " is-success" : " is-danger";
   }
 
-  displayHelperMessageIfNumericInputIsNegative = (story, inputName) => {
+  displayHelperMessageIfNumericInputIsNegative = (story, inputName, itemIndex = 0) => {
+    if(story === "story3" && inputName === "itemQuantityToOrder"){
+      return this.state[story].inputs.items[itemIndex][inputName] >= 0 ? " is-hidden" : " is-danger";
+    }
+
     return this.state[story].inputs[inputName] >= 0 ? " is-hidden" : " is-danger";
   }
 
@@ -208,81 +225,10 @@ class App extends React.Component{
 
        <Story1 story1 = {this.state.story1} highlightInputIfEmpty = {this.highlightInputIfEmpty} displayHelperMessageIfInputEmpty = {this.displayHelperMessageIfInputEmpty} handleInputChange = {this.handleInputChange} createCustomer = {this.createCustomer} />
        <Story2 story2 = {this.state.story2} highlightInputIfEmpty = {this.highlightInputIfEmpty} displayHelperMessageIfInputEmpty = {this.displayHelperMessageIfInputEmpty} handleInputChange = {this.handleInputChange} highlightNumericInputIfNegative = {this.highlightNumericInputIfNegative} displayHelperMessageIfNumericInputIsNegative = {this.displayHelperMessageIfNumericInputIsNegative} addItem = {this.addItem} />
+       <Story3 story3 = {this.state.story3} highlightInputIfEmpty = {this.highlightInputIfEmpty} displayHelperMessageIfInputEmpty = {this.displayHelperMessageIfInputEmpty} handleInputChange = {this.handleInputChange} highlightNumericInputIfNegative = {this.highlightNumericInputIfNegative} displayHelperMessageIfNumericInputIsNegative = {this.displayHelperMessageIfNumericInputIsNegative} addItemToOrder = {this.addItemToOrder} removeItemToOrder = {this.removeItemToOrder} OrderItems = {this.OrderItems} handleStory3Inputs = {this.handleStory3Inputs}  addItem = {this.addItem} />
+
+
         
-
-
-        <Section>
-        <Heading>Story #3 - Order items: POST request to /orders</Heading>
-        <div className="endpointSectionBody">
-          <div className="endpointSectionBody-inputSide">
-            
-            <div className="field">
-              <label className="label">Customer ID</label>
-              <div className="control">
-                <input type="text" className={ "input" + this.highlightInputIfEmpty("story3", "customerId") } value={this.state.story3.inputs.customerId} onChange={this.handleInputChange} data-story="story3" name="customerId" placeholder="ab9s3i16-53ca-4e5e-85ef-4ed3dc59f356"/>
-                <p className={"help "  + this.displayHelperMessageIfInputEmpty("story3", "customerId")}>Customer ID can't be empty</p>
-              </div>
-            </div>
-
-            <Heading size={5} id="itemsToOrderHeading">Items to order:</Heading>
-            <div className="itemsToOrder">
-              {this.state.story3.inputs.items.map((value, index) => {
-                return (
-                  <div key={index}>
-                          <div className="field">
-                            <label className="label">Item #{index+1}'s ID</label>
-                              <div className="control">
-                                <input type="text" className={ "input"} value={value.itemId} onChange={this.handleStory3Inputs} data-story="story3" data-item-index={index} name="itemId" placeholder="ab9s3i16-53ca-4e5e-85ef-4ed3dc59f356"/>
-                                {/* <p className={"help "  + this.displayHelperMessageIfInputEmpty("story3", "name")}>Item name can't be empty</p> */}
-                              </div>
-                            </div>
-
-                            <div className="field">
-                              <label className="label">Amount of item #{index+1} to order</label>
-                              <div className="control">
-                                <input type="number" min={0} className={"input " } value={value.itemQuantityToOrder} onChange={this.handleStory3Inputs} data-item-index={index} data-story="story3" name="itemQuantityToOrder" placeholder="5"/>
-                                {/* <p className={"help " + this.displayHelperMessageIfInputEmpty("story2", "description")}>Item's description can't be empty</p> */}
-                              </div>
-                            </div>
-                            <br></br>
-                    </div>
-                )
-              })}
-            </div>
-
-          
-            <div className="field is-grouped">
-            <div className="control">
-                <button className="button is-link" onClick={this.addItemToOrder}>Add Items to order</button>
-              </div>
-              <div className="control">
-                <button className="button is-danger" onClick={this.removeItemToOrder}>Remove Items to order</button>
-              </div>
-              <div className="control">
-                <button className="button is-primary" onClick={this.OrderItems}>Order Items</button>
-              </div>
-            </div>
-
-          </div>
-          <Hero className="has-background-grey-lighter endpointSectionBody-descriptionSide" id="initialDataHero">
-            <Hero.Body className="is-size-5">
-              <div><span className="has-text-weight-bold">Requirements:</span> A Customer ID in the Header for the customerId key. Also a JSON payload in the body which contains an Array of objects with the following fields:
-              <ul>
-                <li>itemId: String</li>
-                <li>itemQuantityToOrder: Integer</li>
-              </ul>
-              </div>
-              <br/>
-              <div><span className="has-text-weight-bold">Expected Response:</span> JSON object of the newly created order</div>
-            </Hero.Body>
-          </Hero>
-          
-        </div>
-        <div className={"endpointSectionResult" + (this.state.story3.returnedResult.length === 0 ? " is-hidden" : "")}>
-          <Heading size={4} >Results:</Heading>
-          <textarea className={"textarea " + (this.state.story3.requestWasSuccessful ? " is-success" : " is-danger")} rows={7} value={this.state.story3.returnedResult} readOnly></textarea>
-        </div>
-        </Section>
       </div>
     )
   }
