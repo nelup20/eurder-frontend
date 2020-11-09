@@ -41,7 +41,7 @@ class Story7 extends React.Component{
                 <div className="field">
                   <label className="label">User ID</label>
                   <div className="control">
-                    <input type="text" className={ "input" + this.highlightInputIfEmpty("story7", "userId") } value={this.state.story7.inputs.userId} onChange={this.handleInputChange} data-story="story7" name="userId" placeholder="John"/>
+                    <input type="text" className={ "input" + this.highlightInputIfEmpty("story7", "userId") } value={this.state.story7.inputs.userId} onChange={this.handleInputChange} data-story="story7" name="userId" placeholder="ab9s3i16-53ca-4e5e-85ef-4ed3dc59f356"/>
                     <p className={"help "  + this.displayHelperMessageIfInputEmpty("story7", "userId")}>User ID can't be empty</p>
                   </div>
                 </div>
