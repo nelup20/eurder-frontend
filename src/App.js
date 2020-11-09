@@ -8,7 +8,7 @@ class App extends React.Component{
   BASE_URL = "http://localhost:8080";
   
   state = {
-    section1: {
+    story1: {
         inputs: {
           firstName: "Tom",
           lastName: "Doe",
@@ -21,7 +21,7 @@ class App extends React.Component{
         requestWasSuccessful: true
     },
 
-    section2: {
+    story2: {
       inputs: {
         userId: "de6def71-53ca-4e5e-85ef-9ed3ab598391",
         name: "Bread",
@@ -31,28 +31,47 @@ class App extends React.Component{
       },
       returnedResult: "",
       requestWasSuccessful: true
-    }
+    },
+
+    story3: {
+      inputs: {
+        numberOfItems: 1,
+        customerId: "c6093628-b11a-4ece-b2f0-509fc0f3c132",
+        items: [
+          {
+            itemId: "44492ce0-dfca-49f5-b519-0bf2839f2d64",
+            itemQuantityToOrder: 5
+        },
+        {
+          itemId: "bc23cbd0-fc7a-404d-a473-39711a0f7c7c",
+          itemQuantityToOrder: 22
+        }
+      ]
+      },
+      returnedResult: "",
+      requestWasSuccessful: true
+    },
   }
 
-  highlightInputIfEmpty = (section, inputName) => {
-    return this.state[section].inputs[inputName].length !== 0 ? " is-success" : " is-danger";
+  highlightInputIfEmpty = (story, inputName) => {
+    return this.state[story].inputs[inputName].length !== 0 ? " is-success" : " is-danger";
   }
 
-  displayHelperMessageIfInputEmpty = (section, inputName) => {
-    return this.state[section].inputs[inputName].length !== 0 ? " is-hidden" : " is-danger";
+  displayHelperMessageIfInputEmpty = (story, inputName) => {
+    return this.state[story].inputs[inputName].length !== 0 ? " is-hidden" : " is-danger";
   }
 
-  highlightNumericInputIfNegative = (section, inputName) => {
-    return this.state[section].inputs[inputName] >= 0 ? " is-success" : " is-danger";
+  highlightNumericInputIfNegative = (story, inputName) => {
+    return this.state[story].inputs[inputName] >= 0 ? " is-success" : " is-danger";
   }
 
-  displayHelperMessageIfNumericInputIsNegative = (section, inputName) => {
-    return this.state[section].inputs[inputName] >= 0 ? " is-hidden" : " is-danger";
+  displayHelperMessageIfNumericInputIsNegative = (story, inputName) => {
+    return this.state[story].inputs[inputName] >= 0 ? " is-hidden" : " is-danger";
   }
 
-  areAllInputsInSectionNotEmpty(section){
+  areAllInputsInStoryNotEmpty(story){
 
-    for(let input of Object.values(this.state[section].inputs)){
+    for(let input of Object.values(this.state[story].inputs)){
         if(input.length === 0) return false;
     }
 
@@ -65,34 +84,45 @@ class App extends React.Component{
     };
 
     let body = JSON.stringify({
-      firstName: this.state.section1.inputs.firstName,
-      lastName: this.state.section1.inputs.lastName,
-      emailAddress: this.state.section1.inputs.emailAddress,
-      address: this.state.section1.inputs.address,
-      phoneNumber: this.state.section1.inputs.phoneNumber
+      firstName: this.state.story1.inputs.firstName,
+      lastName: this.state.story1.inputs.lastName,
+      emailAddress: this.state.story1.inputs.emailAddress,
+      address: this.state.story1.inputs.address,
+      phoneNumber: this.state.story1.inputs.phoneNumber
     });
 
-    this.makePostRequestAndDisplayResult("/customers", body, headers, "section1");
+    this.makePostRequestAndDisplayResult("/customers", body, headers, "story1");
   }
 
   addItem = () => {
     let headers = {
       "Content-Type": "application/json",
-      "userId": this.state.section2.inputs.userId
+      "userId": this.state.story2.inputs.userId
     };
 
     let body = JSON.stringify({
-      name: this.state.section2.inputs.name,
-      description: this.state.section2.inputs.description,
-      priceInEuros: this.state.section2.inputs.priceInEuros,
-      amountInStock: Math.floor(this.state.section2.inputs.amountInStock)
+      name: this.state.story2.inputs.name,
+      description: this.state.story2.inputs.description,
+      priceInEuros: this.state.story2.inputs.priceInEuros,
+      amountInStock: Math.floor(this.state.story2.inputs.amountInStock)
     });
 
-    this.makePostRequestAndDisplayResult("/items", body, headers, "section2");
+    this.makePostRequestAndDisplayResult("/items", body, headers, "story2");
   }
 
-  makePostRequestAndDisplayResult = (endpoint, body, headers, section) => {
-    if(this.areAllInputsInSectionNotEmpty(section)){
+  OrderItems = () => {
+    let headers = {
+      "Content-Type": "application/json",
+      "customerId": this.state.story3.inputs.customerId
+    };
+
+    let body = JSON.stringify(this.state.story3.inputs.items);
+
+    this.makePostRequestAndDisplayResult("/orders", body, headers, "story3");
+  }
+
+  makePostRequestAndDisplayResult = (endpoint, body, headers, story) => {
+    if(this.areAllInputsInStoryNotEmpty(story)){
 
       fetch( this.BASE_URL + endpoint, {
         method: "POST",
@@ -105,8 +135,8 @@ class App extends React.Component{
           stringResult = stringResult.replaceAll(",\"", ",\n\"");
 
           let oldState = this.state;
-          oldState[section].returnedResult = stringResult;
-          oldState[section].requestWasSuccessful = result.status && (result.status === 400 || result.status === 401 || result.status === 403 || result.status === 404) ? false : true;
+          oldState[story].returnedResult = stringResult;
+          oldState[story].requestWasSuccessful = result.status && (result.status === 400 || result.status === 401 || result.status === 403 || result.status === 404) ? false : true;
 
           this.setState(oldState)
         })
@@ -117,20 +147,53 @@ class App extends React.Component{
   handleInputChange = (event) => {
     let inputName = event.target.name;
     let inputValue = event.target.value;
-    let inputSection = event.target.getAttribute("data-section");
+    let inputStory = event.target.getAttribute("data-story");
 
     let oldState = this.state;
 
     if(inputName === "emailAddress"){
-      oldState[inputSection].isEmailValid = this.EMAIL_REGEX.test(inputValue);
+      oldState[inputStory].isEmailValid = this.EMAIL_REGEX.test(inputValue);
     }
 
-    oldState[inputSection].inputs[inputName] = inputValue;
+    oldState[inputStory].inputs[inputName] = inputValue;
 
     this.setState(oldState);
   }
 
+  handleStory3Inputs = (event) => {
+    let itemIndex = event.target.getAttribute("data-item-index");
+    let inputName = event.target.name; 
+    let inputValue = event.target.value;
+
+    let oldState = this.state;
+
+    oldState.story3.inputs.items[itemIndex][inputName] = inputValue;
+
+    this.setState(oldState);
+  }
+
+  addItemToOrder = () => {
+    let oldState = this.state;
+    oldState.story3.inputs.items.push({
+      itemId: "",
+      itemQuantityToOrder: 0
+    });
+
+    this.setState(oldState);
+  }
+
+  removeItemToOrder = () => {
+    let oldState = this.state;
+    oldState.story3.inputs.items.pop();
+
+    this.setState(oldState);
+  }
+
+
+
+
   render(){
+    
     return(
       <div className="container">
         <img src="order-logo.png" id="order-logo"/>
@@ -156,47 +219,47 @@ class App extends React.Component{
         </Section>
 
         <Section>
-        <Heading>#1 - Create a customer account: POST request to /customers</Heading>
+        <Heading>Story #1 - Create a customer account: POST request to /customers</Heading>
         <div className="endpointSectionBody">
           <div className="endpointSectionBody-inputSide">
             
             <div className="field">
               <label className="label">Customer's first name</label>
               <div className="control">
-                <input type="text" className={ "input" + this.highlightInputIfEmpty("section1", "firstName") } value={this.state.section1.inputs.firstName} onChange={this.handleInputChange} data-section="section1" name="firstName" placeholder="John"/>
-                <p className={"help "  + this.displayHelperMessageIfInputEmpty("section1", "firstName")}>First name can't be empty</p>
+                <input type="text" className={ "input" + this.highlightInputIfEmpty("story1", "firstName") } value={this.state.story1.inputs.firstName} onChange={this.handleInputChange} data-story="story1" name="firstName" placeholder="John"/>
+                <p className={"help "  + this.displayHelperMessageIfInputEmpty("story1", "firstName")}>First name can't be empty</p>
               </div>
             </div>
 
             <div className="field">
               <label className="label">Customer's last name</label>
               <div className="control">
-                <input type="text" className={ "input" + this.highlightInputIfEmpty("section1", "lastName") } value={this.state.section1.inputs.lastName} onChange={this.handleInputChange} data-section="section1" name="lastName" placeholder="Doe"/>
-                <p className={"help "  + this.displayHelperMessageIfInputEmpty("section1", "lastName")}>Last name can't be empty</p>
+                <input type="text" className={ "input" + this.highlightInputIfEmpty("story1", "lastName") } value={this.state.story1.inputs.lastName} onChange={this.handleInputChange} data-story="story1" name="lastName" placeholder="Doe"/>
+                <p className={"help "  + this.displayHelperMessageIfInputEmpty("story1", "lastName")}>Last name can't be empty</p>
               </div>
             </div>
 
             <div className="field">
               <label className="label">Customer's email</label>
               <div className="control">
-                <input type="email" className={"input " + (this.state.section1.isEmailValid ? " is-success" : " is-danger") } value={this.state.section1.inputs.emailAddress} onChange={this.handleInputChange} data-section="section1" name="emailAddress" placeholder="john@doe.com"/>
-                <p className={"help " + (this.state.section1.isEmailValid ? " is-hidden" : " is-danger")}>This email is invalid</p>
+                <input type="email" className={"input " + (this.state.story1.isEmailValid ? " is-success" : " is-danger") } value={this.state.story1.inputs.emailAddress} onChange={this.handleInputChange} data-story="story1" name="emailAddress" placeholder="john@doe.com"/>
+                <p className={"help " + (this.state.story1.isEmailValid ? " is-hidden" : " is-danger")}>This email is invalid</p>
               </div>
             </div>
 
             <div className="field">
               <label className="label">Customer's address</label>
               <div className="control">
-                <input type="text" className={ "input" + this.highlightInputIfEmpty("section1", "address") } value={this.state.section1.inputs.address} onChange={this.handleInputChange} data-section="section1" name="address" placeholder="John doe street 23"/>
-                <p className={"help "  + this.displayHelperMessageIfInputEmpty("section1", "address")}>Address can't be empty</p>
+                <input type="text" className={ "input" + this.highlightInputIfEmpty("story1", "address") } value={this.state.story1.inputs.address} onChange={this.handleInputChange} data-story="story1" name="address" placeholder="John doe street 23"/>
+                <p className={"help "  + this.displayHelperMessageIfInputEmpty("story1", "address")}>Address can't be empty</p>
               </div>
             </div>
 
             <div className="field">
               <label className="label">Customer's phone number</label>
               <div className="control">
-                <input type="text" className={ "input" + this.highlightInputIfEmpty("section1", "phoneNumber") } value={this.state.section1.inputs.phoneNumber} onChange={this.handleInputChange} data-section="section1" name="phoneNumber" placeholder="012345678"/>
-                <p className={"help "  + this.displayHelperMessageIfInputEmpty("section1", "phoneNumber")}>Phone number can't be empty</p>
+                <input type="text" className={ "input" + this.highlightInputIfEmpty("story1", "phoneNumber") } value={this.state.story1.inputs.phoneNumber} onChange={this.handleInputChange} data-story="story1" name="phoneNumber" placeholder="012345678"/>
+                <p className={"help "  + this.displayHelperMessageIfInputEmpty("story1", "phoneNumber")}>Phone number can't be empty</p>
               </div>
             </div>
 
@@ -224,54 +287,54 @@ class App extends React.Component{
           </Hero>
           
         </div>
-        <div className={"endpointSectionResult" + (this.state.section1.returnedResult.length === 0 ? " is-hidden" : "")}>
+        <div className={"endpointSectionResult" + (this.state.story1.returnedResult.length === 0 ? " is-hidden" : "")}>
           <Heading size={4} >Results:</Heading>
-          <textarea className={"textarea " + (this.state.section1.requestWasSuccessful ? " is-success" : " is-danger")} rows={7} value={this.state.section1.returnedResult} readOnly></textarea>
+          <textarea className={"textarea " + (this.state.story1.requestWasSuccessful ? " is-success" : " is-danger")} rows={7} value={this.state.story1.returnedResult} readOnly></textarea>
         </div>
         </Section>
 
         <Section>
-        <Heading>#2 - Add an item: POST request to /items</Heading>
+        <Heading>Story #2 - Add an item: POST request to /items</Heading>
         <div className="endpointSectionBody">
           <div className="endpointSectionBody-inputSide">
             
             <div className="field">
               <label className="label">User ID</label>
               <div className="control">
-                <input type="text" className={ "input" + this.highlightInputIfEmpty("section2", "userId") } value={this.state.section2.inputs.userId} onChange={this.handleInputChange} data-section="section2" name="userId" placeholder="ab9s3i16-53ca-4e5e-85ef-4ed3dc59f356"/>
-                <p className={"help "  + this.displayHelperMessageIfInputEmpty("section2", "userId")}>User ID can't be empty</p>
+                <input type="text" className={ "input" + this.highlightInputIfEmpty("story2", "userId") } value={this.state.story2.inputs.userId} onChange={this.handleInputChange} data-story="story2" name="userId" placeholder="ab9s3i16-53ca-4e5e-85ef-4ed3dc59f356"/>
+                <p className={"help "  + this.displayHelperMessageIfInputEmpty("story2", "userId")}>User ID can't be empty</p>
               </div>
             </div>
 
             <div className="field">
               <label className="label">Item's name</label>
               <div className="control">
-                <input type="text" className={ "input" + this.highlightInputIfEmpty("section2", "name") } value={this.state.section2.inputs.name} onChange={this.handleInputChange} data-section="section2" name="name" placeholder="Coca-Cola"/>
-                <p className={"help "  + this.displayHelperMessageIfInputEmpty("section2", "name")}>Item name can't be empty</p>
+                <input type="text" className={ "input" + this.highlightInputIfEmpty("story2", "name") } value={this.state.story2.inputs.name} onChange={this.handleInputChange} data-story="story2" name="name" placeholder="Coca-Cola"/>
+                <p className={"help "  + this.displayHelperMessageIfInputEmpty("story2", "name")}>Item name can't be empty</p>
               </div>
             </div>
 
             <div className="field">
               <label className="label">Item's description</label>
               <div className="control">
-                <input type="text" className={"input " + this.highlightInputIfEmpty("section2", "description") } value={this.state.section2.inputs.description} onChange={this.handleInputChange} data-section="section2" name="description" placeholder="A very refreshing carbonated drink"/>
-                <p className={"help " + this.displayHelperMessageIfInputEmpty("section2", "description")}>Item's description can't be empty</p>
+                <input type="text" className={"input " + this.highlightInputIfEmpty("story2", "description") } value={this.state.story2.inputs.description} onChange={this.handleInputChange} data-story="story2" name="description" placeholder="A very refreshing carbonated drink"/>
+                <p className={"help " + this.displayHelperMessageIfInputEmpty("story2", "description")}>Item's description can't be empty</p>
               </div>
             </div>
 
             <div className="field">
               <label className="label">Item's price in euros</label>
               <div className="control">
-                <input type="number" min={0} className={ "input" + this.highlightNumericInputIfNegative("section2", "priceInEuros") } value={this.state.section2.inputs.priceInEuros} data-section="section2" onChange={this.handleInputChange} name="priceInEuros" placeholder="2.45"/>
-                <p className={"help "  + this.displayHelperMessageIfNumericInputIsNegative("section2", "priceInEuros")}>Price can't be negative</p>
+                <input type="number" min={0} className={ "input" + this.highlightNumericInputIfNegative("story2", "priceInEuros") } value={this.state.story2.inputs.priceInEuros} data-story="story2" onChange={this.handleInputChange} name="priceInEuros" placeholder="2.45"/>
+                <p className={"help "  + this.displayHelperMessageIfNumericInputIsNegative("story2", "priceInEuros")}>Price can't be negative</p>
               </div>
             </div>
 
             <div className="field">
               <label className="label">Amount of item in stock</label>
               <div className="control">
-                <input type="number" min={0} className={ "input" + this.highlightNumericInputIfNegative("section2", "amountInStock") } value={this.state.section2.inputs.amountInStock} data-section="section2" onChange={this.handleInputChange} name="amountInStock" placeholder="5"/>
-                <p className={"help "  + this.displayHelperMessageIfNumericInputIsNegative("section2", "amountInStock")}>Amount in stock can't be negative</p>
+                <input type="number" min={0} className={ "input" + this.highlightNumericInputIfNegative("story2", "amountInStock") } value={this.state.story2.inputs.amountInStock} data-story="story2" onChange={this.handleInputChange} name="amountInStock" placeholder="5"/>
+                <p className={"help "  + this.displayHelperMessageIfNumericInputIsNegative("story2", "amountInStock")}>Amount in stock can't be negative</p>
               </div>
             </div>
 
@@ -298,9 +361,83 @@ class App extends React.Component{
           </Hero>
           
         </div>
-        <div className={"endpointSectionResult" + (this.state.section2.returnedResult.length === 0 ? " is-hidden" : "")}>
+        <div className={"endpointSectionResult" + (this.state.story2.returnedResult.length === 0 ? " is-hidden" : "")}>
           <Heading size={4} >Results:</Heading>
-          <textarea className={"textarea " + (this.state.section2.requestWasSuccessful ? " is-success" : " is-danger")} rows={7} value={this.state.section2.returnedResult} readOnly></textarea>
+          <textarea className={"textarea " + (this.state.story2.requestWasSuccessful ? " is-success" : " is-danger")} rows={7} value={this.state.story2.returnedResult} readOnly></textarea>
+        </div>
+        </Section>
+
+
+        <Section>
+        <Heading>Story #3 - Order items: POST request to /orders</Heading>
+        <div className="endpointSectionBody">
+          <div className="endpointSectionBody-inputSide">
+            
+            <div className="field">
+              <label className="label">Customer ID</label>
+              <div className="control">
+                <input type="text" className={ "input" + this.highlightInputIfEmpty("story3", "customerId") } value={this.state.story3.inputs.customerId} onChange={this.handleInputChange} data-story="story3" name="customerId" placeholder="ab9s3i16-53ca-4e5e-85ef-4ed3dc59f356"/>
+                <p className={"help "  + this.displayHelperMessageIfInputEmpty("story3", "customerId")}>Customer ID can't be empty</p>
+              </div>
+            </div>
+
+            <Heading size={5} id="itemsToOrderHeading">Items to order:</Heading>
+            <div className="itemsToOrder">
+              {this.state.story3.inputs.items.map((value, index) => {
+                return (
+                  <div key={index}>
+                          <div className="field">
+                            <label className="label">Item #{index+1}'s ID</label>
+                              <div className="control">
+                                <input type="text" className={ "input"} value={value.itemId} onChange={this.handleStory3Inputs} data-story="story3" data-item-index={index} name="itemId" placeholder="ab9s3i16-53ca-4e5e-85ef-4ed3dc59f356"/>
+                                {/* <p className={"help "  + this.displayHelperMessageIfInputEmpty("story3", "name")}>Item name can't be empty</p> */}
+                              </div>
+                            </div>
+
+                            <div className="field">
+                              <label className="label">Amount of item #{index+1} to order</label>
+                              <div className="control">
+                                <input type="number" min={0} className={"input " } value={value.itemQuantityToOrder} onChange={this.handleStory3Inputs} data-item-index={index} data-story="story3" name="itemQuantityToOrder" placeholder="5"/>
+                                {/* <p className={"help " + this.displayHelperMessageIfInputEmpty("story2", "description")}>Item's description can't be empty</p> */}
+                              </div>
+                            </div>
+                            <br></br>
+                    </div>
+                )
+              })}
+            </div>
+
+          
+            <div className="field is-grouped">
+            <div className="control">
+                <button className="button is-link" onClick={this.addItemToOrder}>Add Items to order</button>
+              </div>
+              <div className="control">
+                <button className="button is-danger" onClick={this.removeItemToOrder}>Remove Items to order</button>
+              </div>
+              <div className="control">
+                <button className="button is-primary" onClick={this.OrderItems}>Order Items</button>
+              </div>
+            </div>
+
+          </div>
+          <Hero className="has-background-grey-lighter endpointSectionBody-descriptionSide" id="initialDataHero">
+            <Hero.Body className="is-size-5">
+              <div><span className="has-text-weight-bold">Requirements:</span> A Customer ID in the Header for the customerId key. Also a JSON payload in the body which contains an Array of objects with the following fields:
+              <ul>
+                <li>itemId: String</li>
+                <li>itemQuantityToOrder: Integer</li>
+              </ul>
+              </div>
+              <br/>
+              <div><span className="has-text-weight-bold">Expected Response:</span> JSON object of the newly created order</div>
+            </Hero.Body>
+          </Hero>
+          
+        </div>
+        <div className={"endpointSectionResult" + (this.state.story3.returnedResult.length === 0 ? " is-hidden" : "")}>
+          <Heading size={4} >Results:</Heading>
+          <textarea className={"textarea " + (this.state.story3.requestWasSuccessful ? " is-success" : " is-danger")} rows={7} value={this.state.story3.returnedResult} readOnly></textarea>
         </div>
         </Section>
       </div>
