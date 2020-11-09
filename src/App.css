@@ -45,3 +45,15 @@ ul{
 .endpointSectionResult{
   margin-top: 15px;
 }
+
+.itemsToOrder{
+  width: 85%;
+  margin-bottom: 15px;
+  border: 1px solid gray;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+#itemsToOrderHeading{
+  margin-bottom: 8px;
+}
