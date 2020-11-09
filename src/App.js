@@ -7,6 +7,7 @@ import Story3 from "./stories/Story3";
 import Story7 from "./stories/Story7";
 import Story8 from "./stories/Story8";
 import Story5 from "./stories/Story5";
+import Story4 from "./stories/Story4";
 import "react-bulma-components/dist/react-bulma-components.min.css";
 import './App.css';
 
@@ -84,6 +85,19 @@ class App extends React.Component{
       returnedResult: "",
       requestWasSuccessful: true
     },
+
+    story4: {
+      inputs: {
+        userId: "de6def71-53ca-4e5e-85ef-9ed3ab598391",
+        itemId: "44492ce0-dfca-49f5-b519-0bf2839f2d64",
+        name: "Bread",
+        description: "The best bread in the world.",
+        priceInEuros: 6.75,
+        amountInStock: 10
+      },
+      returnedResult: "",
+      requestWasSuccessful: true
+    },
   }
 
   highlightInputIfEmpty = (story, inputName, itemIndex = 0) => {
@@ -141,7 +155,7 @@ class App extends React.Component{
       phoneNumber: this.state.story1.inputs.phoneNumber
     });
 
-    this.makePostRequestAndDisplayResult("/customers", body, headers, "story1");
+    this.makePostOrPutRequestAndDisplayResult("/customers", "POST", body, headers, "story1");
   }
 
   addItem = () => {
@@ -157,7 +171,7 @@ class App extends React.Component{
       amountInStock: Math.floor(this.state.story2.inputs.amountInStock)
     });
 
-    this.makePostRequestAndDisplayResult("/items", body, headers, "story2");
+    this.makePostOrPutRequestAndDisplayResult("/items", "POST", body, headers, "story2");
   }
 
   OrderItems = () => {
@@ -168,7 +182,7 @@ class App extends React.Component{
 
     let body = JSON.stringify(this.state.story3.inputs.items);
 
-    this.makePostRequestAndDisplayResult("/orders", body, headers, "story3");
+    this.makePostOrPutRequestAndDisplayResult("/orders", "POST", body, headers, "story3");
   }
 
   getAllCustomers = () => {
@@ -195,6 +209,22 @@ class App extends React.Component{
     this.makeGetRequestAndDisplayResult("/orders/my-orders", headers, "story5");
   }
 
+  updateItem = () => {
+    let headers = {
+      "Content-Type": "application/json",
+      "userId": this.state.story4.inputs.userId
+    };
+
+    let body = JSON.stringify({
+      name: this.state.story4.inputs.name,
+      description: this.state.story4.inputs.description,
+      priceInEuros: this.state.story4.inputs.priceInEuros,
+      amountInStock: Math.floor(this.state.story4.inputs.amountInStock)
+    });
+
+    this.makePostOrPutRequestAndDisplayResult("/items/" + this.state.story4.inputs.itemId, "PUT", body, headers, "story4");
+  }
+
   makeGetRequestAndDisplayResult = (endpoint, headers, story) => {
     if(this.areAllInputsInStoryNotEmpty(story)){
 
@@ -217,11 +247,11 @@ class App extends React.Component{
     };
   }
 
-  makePostRequestAndDisplayResult = (endpoint, body, headers, story) => {
+  makePostOrPutRequestAndDisplayResult = (endpoint, requestMethod, body, headers, story) => {
     if(this.areAllInputsInStoryNotEmpty(story)){
 
       fetch( this.BASE_URL + endpoint, {
-        method: "POST",
+        method: requestMethod,
         mode: "cors",
         headers: headers,
         body: body
@@ -303,6 +333,7 @@ class App extends React.Component{
        <Story7 story7 = {this.state.story7} highlightInputIfEmpty = {this.highlightInputIfEmpty} displayHelperMessageIfInputEmpty = {this.displayHelperMessageIfInputEmpty} handleInputChange = {this.handleInputChange} getAllCustomers = {this.getAllCustomers} />
        <Story8 story8 = {this.state.story8} highlightInputIfEmpty = {this.highlightInputIfEmpty} displayHelperMessageIfInputEmpty = {this.displayHelperMessageIfInputEmpty} handleInputChange = {this.handleInputChange} getCustomerById = {this.getCustomerById} />
        <Story5 story5 = {this.state.story5} highlightInputIfEmpty = {this.highlightInputIfEmpty} displayHelperMessageIfInputEmpty = {this.displayHelperMessageIfInputEmpty} handleInputChange = {this.handleInputChange} getReportOfOrders = {this.getReportOfOrders} />
+       <Story4 story4 = {this.state.story4} highlightInputIfEmpty = {this.highlightInputIfEmpty} displayHelperMessageIfInputEmpty = {this.displayHelperMessageIfInputEmpty} handleInputChange = {this.handleInputChange} highlightNumericInputIfNegative = {this.highlightNumericInputIfNegative} displayHelperMessageIfNumericInputIsNegative = {this.displayHelperMessageIfNumericInputIsNegative} updateItem = {this.updateItem} />
       </div>
     )
   }
