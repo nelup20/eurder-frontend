@@ -6,6 +6,7 @@ import Story2 from "./stories/Story2";
 import Story3 from "./stories/Story3";
 import Story7 from "./stories/Story7";
 import Story8 from "./stories/Story8";
+import Story5 from "./stories/Story5";
 import "react-bulma-components/dist/react-bulma-components.min.css";
 import './App.css';
 
@@ -74,7 +75,15 @@ class App extends React.Component{
       },
       returnedResult: "",
       requestWasSuccessful: true
-    }
+    },
+
+    story5: {
+      inputs: {
+        customerId: "c6093628-b11a-4ece-b2f0-509fc0f3c132"
+      },
+      returnedResult: "",
+      requestWasSuccessful: true
+    },
   }
 
   highlightInputIfEmpty = (story, inputName, itemIndex = 0) => {
@@ -176,6 +185,14 @@ class App extends React.Component{
     };
 
     this.makeGetRequestAndDisplayResult("/customers/" + this.state.story8.inputs.customerId, headers, "story8");
+  }
+
+  getReportOfOrders = () => {
+    let headers = {
+      "customerId": this.state.story5.inputs.customerId
+    };
+
+    this.makeGetRequestAndDisplayResult("/orders/my-orders", headers, "story5");
   }
 
   makeGetRequestAndDisplayResult = (endpoint, headers, story) => {
@@ -285,7 +302,7 @@ class App extends React.Component{
        <Story3 story3 = {this.state.story3} highlightInputIfEmpty = {this.highlightInputIfEmpty} displayHelperMessageIfInputEmpty = {this.displayHelperMessageIfInputEmpty} handleInputChange = {this.handleInputChange} highlightNumericInputIfNegative = {this.highlightNumericInputIfNegative} displayHelperMessageIfNumericInputIsNegative = {this.displayHelperMessageIfNumericInputIsNegative} addItemToOrder = {this.addItemToOrder} removeItemToOrder = {this.removeItemToOrder} OrderItems = {this.OrderItems} handleStory3Inputs = {this.handleStory3Inputs}  addItem = {this.addItem} />
        <Story7 story7 = {this.state.story7} highlightInputIfEmpty = {this.highlightInputIfEmpty} displayHelperMessageIfInputEmpty = {this.displayHelperMessageIfInputEmpty} handleInputChange = {this.handleInputChange} getAllCustomers = {this.getAllCustomers} />
        <Story8 story8 = {this.state.story8} highlightInputIfEmpty = {this.highlightInputIfEmpty} displayHelperMessageIfInputEmpty = {this.displayHelperMessageIfInputEmpty} handleInputChange = {this.handleInputChange} getCustomerById = {this.getCustomerById} />
-        
+       <Story5 story5 = {this.state.story5} highlightInputIfEmpty = {this.highlightInputIfEmpty} displayHelperMessageIfInputEmpty = {this.displayHelperMessageIfInputEmpty} handleInputChange = {this.handleInputChange} getReportOfOrders = {this.getReportOfOrders} />
       </div>
     )
   }
